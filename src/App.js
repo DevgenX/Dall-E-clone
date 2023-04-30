@@ -1,8 +1,11 @@
 import { useState } from "react";
+import Modal from "./components/modal";
 
 const App = () => {
   const [images, setImages] = useState(null);
   const [input, setInput] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const surpriseOptions = [
     "A panda eating bamboo",
@@ -43,6 +46,49 @@ const App = () => {
     }
   };
 
+  const handleUploadImage = async (e) => {
+    console.log(e.target.files[0]);
+    const formData = new FormData();
+    formData.append("file", e.target.files[0]);
+    setModalOpen(true);
+    setSelectedImage(e.target.files[0]);
+    e.target.value = "";
+
+    const config = {
+      method: "POST",
+      body: formData,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/upload", config);
+
+      const data = await response.json();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const generateVariations = async () => {
+    setImages(null);
+    if (selectedImage === null) {
+      alert("Please select an image");
+      setModalOpen(false);
+      return;
+    }
+    const config = {
+      method: "POST",
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/variations", config);
+      const data = await response.json();
+      setImages(data);
+      setModalOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="app">
       <section className="search-section">
@@ -60,6 +106,30 @@ const App = () => {
           />
           <button onClick={handleGenerateImage}>Generate</button>
         </div>
+        <p className="extra-info">
+          Or
+          <span>
+            <label htmlFor="files"> upload an image </label>
+            <input
+              onChange={handleUploadImage}
+              id="files"
+              accept="image/*"
+              type="file"
+              hidden
+            />
+            to edit.
+          </span>
+        </p>
+        {modalOpen && (
+          <div className="overlay">
+            <Modal
+              setModalOpen={setModalOpen}
+              setSelectedImage={setSelectedImage}
+              selectedImage={selectedImage}
+              generateVariations={generateVariations}
+            />
+          </div>
+        )}
       </section>
       <section className="image-section">
         {images?.map((image, _index) => (
