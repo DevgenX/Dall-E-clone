@@ -1,14 +1,21 @@
-import { useState, useRef } from "react";
+import { useState, useRef, SetStateAction } from "react";
+
+interface ModalProps {
+  setModalOpen: React.Dispatch<SetStateAction<boolean>>;
+  setSelectedImage: React.Dispatch<SetStateAction<File | null>>; // Allow for null value
+  selectedImage: File | null; // Allow for null value
+  generateVariations: () => Promise<void>;
+}
 
 const Modal = ({
   setModalOpen,
   setSelectedImage,
   selectedImage,
   generateVariations,
-}) => {
-  const [error, setError] = useState(null);
+}: ModalProps) => {
+  const [error, setError] = useState<string | null>(null);
 
-  const ref = useRef(null);
+  const ref = useRef<HTMLImageElement>(null);
 
   const closeModal = () => {
     setModalOpen(false);
@@ -16,7 +23,7 @@ const Modal = ({
   };
 
   const handleCheckSize = () => {
-    if (ref.current.width === 256 && ref.current.height === 256) {
+    if (ref.current?.width === 256 && ref.current?.height === 256) {
       generateVariations();
     } else {
       setError(`Error uploading Image! Please use 256 x 256 size`);

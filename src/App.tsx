@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import Modal from "./components/modal";
 
 const App = () => {
-  const [images, setImages] = useState(null);
-  const [input, setInput] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [images, setImages] = useState<null | Array<{ url: string }>>(null);
+  const [input, setInput] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const surpriseOptions = [
     "A panda eating bamboo",
@@ -13,7 +13,7 @@ const App = () => {
     "A monkey studying in a cave with a human",
   ];
 
-  const surpriseMe = () => {
+  const surpriseMe = (): void => {
     setImages(null);
     const randomVal =
       surpriseOptions[Math.floor(Math.random() * surpriseOptions.length)];
@@ -21,7 +21,7 @@ const App = () => {
     setInput(randomVal);
   };
 
-  const handleGenerateImage = async () => {
+  const handleGenerateImage = async (): Promise<void> => {
     setImages(null);
 
     if (input === "") {
@@ -46,12 +46,15 @@ const App = () => {
     }
   };
 
-  const handleUploadImage = async (e) => {
-    console.log(e.target.files[0]);
+  const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
     const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+    formData.append("file", file);
     setModalOpen(true);
-    setSelectedImage(e.target.files[0]);
+    setSelectedImage(file);
     e.target.value = "";
 
     const config = {
